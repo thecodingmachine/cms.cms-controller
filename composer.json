@@ -1,0 +1,35 @@
+{
+    "name": "mouf/cms.cms-controller",
+    "description": "CMS controller helps user to create and manage their own pages",
+    "keywords": ["cms", "],
+    "homepage": "https://github.com/thecodingmachine/cms.cms-controller",
+    "type": "mouf-library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kevin Nguyen",
+            "email": "m.teyssier@thecodingmachine.com",
+            "homepage": "http://mouf-php.com"
+        }
+    ],
+    "require": {
+    	"php": ">=5.3.0",
+		"mouf/database.tdbm": "~3.0"
+    },
+    "autoload": {
+        "psr-0": {
+            "Mouf": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "extra": {
+	     "mouf": {
+			"install": [
+				{
+					"type": "file",
+					"file": "src/install.php"
+				}
+			]
+		}
+    }
+}

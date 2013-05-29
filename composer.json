@@ -1,7 +1,7 @@
 {
     "name": "mouf/cms.cms-controller",
     "description": "CMS controller helps user to create and manage their own pages",
-    "keywords": ["cms", "],
+    "keywords": ["cms"],
     "homepage": "https://github.com/thecodingmachine/cms.cms-controller",
     "type": "mouf-library",
     "license": "MIT",

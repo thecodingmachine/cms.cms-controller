@@ -1,10 +1,14 @@
 <?php
-use Mouf\MVC\BCE\BCEForm;
+namespace Mouf\CMS;
+
+use Mouf\Html\Widgets\EvoluGrid\EvoluGrid;
+
+use Mouf\MVC\BCE\BCEFormInstance;
 
 class ContentTypeDescriptor {
 	
 	/**
-	 * @var BCEForm
+	 * @var BCEFormInstance
 	 */
 	public $bceForm;
 	
@@ -15,10 +19,13 @@ class ContentTypeDescriptor {
 	public $name;
 	
 	/**
-	 * 
 	 * @var string
 	 */
 	public $description;
-	
-	
+
+
+	/**
+	 * @var EvoluGridHandlerInterface
+	 */
+	public $gridHandler;
 }

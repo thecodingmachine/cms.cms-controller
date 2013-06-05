@@ -1,6 +1,8 @@
 <?php
 namespace Mouf\CMS;
 
+use Mouf\MVC\BCE\Classes\Renderers\HiddenRenderer;
+
 use Mouf\MoufInstanceDescriptor;
 
 use Mouf\MoufPropertyDescriptor;
@@ -59,12 +61,30 @@ class CMSController extends Controller {
 	}
 	
 	/**
+	 * @URL cms/content/{contentTypeInstanceName}/translate/{tId}/{lId}
+	 */
+	public function translateContent($contentTypeInstanceName, $tId = null, $lId = null){
+		/* @var $contentType ContentTypeDescriptor */
+		$contentType = MoufManager::getMoufManager()->getInstance($contentTypeInstanceName);
+		$this->form = $contentType->bceForm;
+		$this->form->load();
+		
+		$this->form->getDescriptorInstance('translate_id')->setFieldValue($tId);
+		if ($lId != null){
+			$this->form->getDescriptorInstance('language_id')->setFieldValue($lId);
+		}
+	
+		$this->content->addFile(dirname(__FILE__)."/../../views/cms-form.php", $this);
+		$this->template->toHtml();
+	}
+	
+	/**
 	 * @URL cms/content/{contentTypeInstanceName}/save
 	 */
 	public function saveContent($contentTypeInstanceName){
 		$contentType = MoufManager::getMoufManager()->getInstance($contentTypeInstanceName);
 		$this->form = $contentType->bceForm;
-
+		
 		$id = $this->form->save();
 	}
 	
@@ -77,25 +97,51 @@ class CMSController extends Controller {
 		$this->content->addFile(dirname(__FILE__)."/../../views/cms-list.php", $this);
 		$this->template->toHtml();
 	}
+	
+	/**
+	 * @URL cms/content/{contentTypeInstanceName}/list-translate
+	 */
+	public function listTranslateContent($contentTypeInstanceName){
+		$this->contentType = MoufManager::getMoufManager()->getInstance($contentTypeInstanceName);
+	
+		$this->content->addFile(dirname(__FILE__)."/../../views/cms-list-translate.php", $this);
+		$this->template->toHtml();
+	}
+	
 	/**
 	 * @URL cms/content/{contentTypeInstanceName}/listdata
 	 */
-	public function getContentData($contentTypeInstanceName){
+	public function getContentData($contentTypeInstanceName, $offset, $limit = 2){
 		$this->contentType = MoufManager::getMoufManager()->getInstance($contentTypeInstanceName);
-		//TODO a améliorer...
 		$handler = $this->contentType->gridHandler;
-		list($data, $count) = call_user_func(array($dao, $this->contentType->dataMethod), $_GET);
 		
-		foreach ($data as $bean){
-			foreach ($bean->db_row as $key => $value){
-				
-			}
-		}
+		$grid = $handler->getGrid();
 		
-		$this->contentType->grid->setTotalRowsCount($count);
-		$this->contentType->grid->setRows($rows);
+		$rows = $handler->getRows($limit, $offset);
+		$count = $handler->getRowCount();
 		
-		$this->contentType->grid->output();
+		$grid->setTotalRowsCount($count);
+		$grid->setRows($rows);
+		
+		$grid->output();
+	}
+
+	/**
+	 * @URL cms/content/{contentTypeInstanceName}/translate-listdata
+	 */
+	public function getTranslateContentData($contentTypeInstanceName, $offset, $limit = 2){
+		$this->contentType = MoufManager::getMoufManager()->getInstance($contentTypeInstanceName);
+		$handler = $this->contentType->gridHandler;
+		
+		$grid = $handler->getTranslateGrid();
+		
+		$rows = $handler->getTranslateRows($limit, $offset);
+		$count = $handler->getTranslateRowCount();
+		
+		$grid->setTotalRowsCount($count);
+		$grid->setRows($rows);
+		
+		$grid->output();
 	}
 	
 }

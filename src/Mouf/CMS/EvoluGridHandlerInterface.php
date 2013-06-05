@@ -13,5 +13,14 @@ interface EvoluGridHandlerInterface {
 	 * @return EvoluGrid
 	 */
 	public function getGrid();
+
+	public function getTranslateRowCount();
+	
+	public function getTranslateRows();
+	
+	/**
+	 * @return EvoluGrid
+	 */
+	public function getTranslateGrid();
 	
 }

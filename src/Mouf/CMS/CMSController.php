@@ -1,6 +1,8 @@
 <?php
 namespace Mouf\CMS;
 
+use Mouf\Html\Widgets\MessageService\Service\UserMessageInterface;
+
 use Mouf\Html\Widgets\MessageService\Service\SessionMessageService;
 
 use Mouf\Utils\I18n\Fine\Language\LanguageDetectionInterface;
@@ -60,7 +62,7 @@ class CMSController extends Controller {
 	/**
 	 * @var SessionMessageService
 	 */
-	public $messageWidget;
+	public $messageService;
 	
 	/**
 	 * @URL cms/content/{contentTypeInstanceName}/edit/{id}
@@ -79,13 +81,13 @@ class CMSController extends Controller {
 	}
 	
 	/**
-	 * @URL cms/content/{contentTypeInstanceName}/translate/{tId}/{lId}
+	 * @URL cms/content/{contentTypeInstanceName}/translate/{tId}
 	 */
 	public function translateContent($contentTypeInstanceName, $tId = null, $lId = null){
 		/* @var $contentType ContentTypeDescriptor */
 		$contentType = MoufManager::getMoufManager()->getInstance($contentTypeInstanceName);
 		$this->formInstance = new BCEFormInstance();
-		$this->formInstance->form = $contentType->bceForm; 
+		$this->formInstance->form = $contentType->bceForm;
 		$this->formInstance->load();
 		
 		$this->formInstance->getDescriptorInstance('translate_id')->setFieldValue($tId);
@@ -124,6 +126,8 @@ class CMSController extends Controller {
 		$cmsBean->setUpdated(time());
 		$cmsBean->save();
 		
+		$this->messageService->setMessage("Content has been saved", UserMessageInterface::SUCCESS);
+		
 		header("Location:".ROOT_URL."cms/content/$contentTypeInstanceName/list");
 		exit;
 	}
@@ -139,23 +143,13 @@ class CMSController extends Controller {
 	}
 	
 	/**
-	 * @URL cms/content/{contentTypeInstanceName}/list-translate
-	 */
-	public function listTranslateContent($contentTypeInstanceName){
-		$this->contentType = MoufManager::getMoufManager()->getInstance($contentTypeInstanceName);
-	
-		$this->content->addFile(dirname(__FILE__)."/../../views/cms-list-translate.php", $this);
-		$this->template->toHtml();
-	}
-	
-	/**
 	 * @URL cms/content/{contentTypeInstanceName}/listdata
 	 */
 	public function getContentData($contentTypeInstanceName, $offset, $limit = 2){
 		$this->contentType = MoufManager::getMoufManager()->getInstance($contentTypeInstanceName);
 		$grid = $this->contentType->contentGrid;
-		$rows = $this->contentType->getRows($limit, $offset, $this->languageDetection->getLanguage());
-		$count = $this->contentType->getRowCount($this->languageDetection->getLanguage());
+		$rows = $this->contentType->getRows($limit, $offset, $this->languageDetection->getLanguage(), $this->defaultLanguage);
+		$count = $this->contentType->getRowCount($this->languageDetection->getLanguage(), $this->defaultLanguage);
 		
 		$grid->setTotalRowsCount($count);
 		$grid->setRows($rows);
@@ -163,21 +157,4 @@ class CMSController extends Controller {
 		$grid->output();
 	}
 
-	/**
-	 * @URL cms/content/{contentTypeInstanceName}/translate-listdata
-	 */
-	public function getTranslateContentData($contentTypeInstanceName, $offset, $limit = 2){
-		$this->contentType = MoufManager::getMoufManager()->getInstance($contentTypeInstanceName);
-		
-		$grid = $this->contentType->translateGrid;
-		
-		$rows = $this->contentType->getTranslateRows($limit, $offset, $this->languageDetection->getLanguage(), $this->defaultLanguage);
-		$count = $this->contentType->getTranslateRowCount($this->languageDetection->getLanguage(), $this->defaultLanguage);
-		
-		$grid->setTotalRowsCount($count);
-		$grid->setRows($rows);
-		
-		$grid->output();
-	}
-	
 }

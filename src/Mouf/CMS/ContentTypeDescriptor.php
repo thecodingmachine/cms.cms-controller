@@ -28,11 +28,6 @@ abstract class ContentTypeDescriptor implements Scopable {
 	public $contentGrid;
 	
 	/**
-	 * @var EvoluGrid
-	 */
-	public $translateGrid;
-	
-	/**
 	 * @var string
 	 */
 	public $name;
@@ -80,10 +75,8 @@ abstract class ContentTypeDescriptor implements Scopable {
 	}
 	
 	public abstract function getNextTid();
-	public abstract function getRowCount($languge);
-	public abstract function getRows($limit, $offset, $languge);
-	public abstract function getTranslateRowCount($languge, $defaultLanguage);
-	public abstract function getTranslateRows($limit, $offset, $languge, $defaultLanguage);
+	public abstract function getRowCount($languge, $defaultLanguage);
+	public abstract function getRows($limit, $offset, $languge, $defaultLanguage);
 	public abstract function getContent($id);
 	
 }

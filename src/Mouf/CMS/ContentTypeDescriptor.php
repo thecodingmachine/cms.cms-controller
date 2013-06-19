@@ -78,5 +78,6 @@ abstract class ContentTypeDescriptor implements Scopable {
 	public abstract function getRowCount($languge, $defaultLanguage);
 	public abstract function getRows($limit, $offset, $languge, $defaultLanguage);
 	public abstract function getContent($id);
+	public abstract function getReference($tId, $defaultLanguage);
 	
 }

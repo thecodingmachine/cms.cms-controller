@@ -1,6 +1,8 @@
 <?php
 namespace Mouf\CMS;
 
+use Mouf\MVC\BCE\BCEForm;
+
 use Mouf\Html\Template\TemplateInterface;
 
 use Mouf\Html\HtmlElement\HtmlBlock;
@@ -13,12 +15,22 @@ use Mouf\Html\Widgets\EvoluGrid\EvoluGrid;
 
 use Mouf\MVC\BCE\BCEFormInstance;
 
-class ContentTypeDescriptor implements Scopable {
+abstract class ContentTypeDescriptor implements Scopable {
 	
 	/**
-	 * @var BCEFormInstance
+	 * @var BCEForm
 	 */
 	public $bceForm;
+	
+	/**
+	 * @var EvoluGrid
+	 */
+	public $contentGrid;
+	
+	/**
+	 * @var EvoluGrid
+	 */
+	public $translateGrid;
 	
 	/**
 	 * @var string
@@ -30,11 +42,6 @@ class ContentTypeDescriptor implements Scopable {
 	 */
 	public $description;
 
-	/**
-	 * @var ContentTypeHandlerInterface
-	 */
-	public $handler;
-	
 	/**
 	 * @var HtmlFromFile
 	 */
@@ -71,5 +78,12 @@ class ContentTypeDescriptor implements Scopable {
 	public function getUrlsList(){
 		$contents = $this->handler->getUrlData();
 	}
+	
+	public abstract function getNextTid();
+	public abstract function getRowCount($languge);
+	public abstract function getRows($limit, $offset, $languge);
+	public abstract function getTranslateRowCount($languge, $defaultLanguage);
+	public abstract function getTranslateRows($limit, $offset, $languge, $defaultLanguage);
+	public abstract function getContent($id);
 	
 }

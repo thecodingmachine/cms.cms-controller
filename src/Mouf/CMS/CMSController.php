@@ -1,6 +1,10 @@
 <?php
 namespace Mouf\CMS;
 
+use Mouf\Mvc\Splash\Services\UrlProviderInterface;
+
+use Mouf\Mvc\Splash\Services\SplashRoute;
+
 use Mouf\Html\Widgets\MessageService\Service\UserMessageInterface;
 
 use Mouf\Html\Widgets\MessageService\Service\SessionMessageService;
@@ -17,7 +21,7 @@ use Mouf\Mvc\Splash\Controllers\Controller;
 use Mouf\MVC\BCE\BCEFormInstance;
 use Mouf\MoufManager;
 
-class CMSController extends Controller {
+class CMSController extends Controller implements UrlProviderInterface {
 	
 	/**
 	 * @var array<ContentTypeDescriptor>
@@ -111,7 +115,6 @@ class CMSController extends Controller {
 		$id = get('id');
 		$isNew = empty($id);
 	
-		$this->formInstance->load();
 		$id = $this->formInstance->save();
 	
 		$cmsBean =  $contentType->bceForm->mainDAO->getById($id);
@@ -124,7 +127,24 @@ class CMSController extends Controller {
 			$cmsBean->setCreated(time());
 		}
 		$cmsBean->setUpdated(time());
-		$cmsBean->save();
+		$saved = $id != false;
+		
+		$urls = \Mouf::getSplash()->cacheService->get("splashUrlNodes");
+		/* @var $splashRoute SplashRoute */
+		$splashRoute = $urls->walk($cmsBean->getUrl(), null);
+		if ($splashRoute != null && ($splashRoute->controllerInstanceName != $contentTypeInstanceName || ($splashRoute->parameters[0] instanceof CMSParamFetcher && $splashRoute->parameters[0]->value != $cmsBean->getId()))){
+			$this->formInstance->form->addError('url', "URL '". $cmsBean->getUrl() ."' alerady exists please choose a different one.");
+			$saved = false;
+		}
+		if (!$saved){
+			foreach ($this->formInstance->form->errorMessages as $field => $messages){
+				foreach ($messages as $message){
+					$this->messageService->setMessage($message, UserMessageInterface::ERROR);
+				}
+			}
+			header("Location:".ROOT_URL."cms/content/$contentTypeInstanceName/edit/".$cmsBean->getId());
+			exit;			
+		}
 		
 		$this->messageService->setMessage("Content has been saved", UserMessageInterface::SUCCESS);
 		
@@ -155,6 +175,30 @@ class CMSController extends Controller {
 		$grid->setRows($rows);
 		
 		$grid->output();
+	}
+	
+/**
+	 * Returns the list of URLs that can be accessed, and the function/method that should be called when the URL is called.
+	 * 
+	 * @return array<SplashRoute>
+	 */
+	public function getUrlsList() {		
+		// Let's analyze the controller and get all the @Action annotations:
+		$urlsList = parent::getUrlsList();
+		$moufManager = MoufManager::getMoufManager();
+		
+		$refClass = new MoufReflectionClass(get_class($this));
+		
+		foreach ($this->contentTypes as $contentType) {
+			$urlsList = array_merge($urlsList, $contentType->getUrls());
+		}
+		
+		return $urlsList;
+	}
+	
+	public function getUrlByRerence($contentTypeInstanceName, $tId){
+		$this->contentType = MoufManager::getMoufManager()->getInstance($contentTypeInstanceName);
+		return $this->contentType->getUrlByRerence($tId, $this->languageDetection->getLanguage());
 	}
 
 }

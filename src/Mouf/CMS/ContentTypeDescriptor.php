@@ -1,6 +1,10 @@
 <?php
 namespace Mouf\CMS;
 
+use Mouf\MoufManager;
+
+use Mouf\Mvc\Splash\Services\SplashRoute;
+
 use Mouf\MVC\BCE\BCEForm;
 
 use Mouf\Html\Template\TemplateInterface;
@@ -57,7 +61,7 @@ abstract class ContentTypeDescriptor implements Scopable {
 	public $content;
 	
 	public function render($id){
-		$this->page = $this->handler->getContent($id);
+		$this->page = $this->getContent($id);
 		$this->content->addHtmlElement($this->templateFile);
 		$this->template->toHtml();
 	}
@@ -70,8 +74,15 @@ abstract class ContentTypeDescriptor implements Scopable {
 		include $file;
 	}
 	
-	public function getUrlsList(){
-		$contents = $this->handler->getUrlData();
+	public function getUrls(){
+		$moufManager = MoufManager::getMoufManager();
+		$contents = $this->getContents();
+		$urls = array();
+		foreach ($contents as $page){
+			/* @var $page CMSBeanInterface */
+			$urls[] = new SplashRoute($page->getUrl(), $moufManager->findInstanceName($this), 'render', $page->getTitle(), '', null, array(), array(new CMSParamFetcher('id', $page->getId())));
+		}
+		return $urls;
 	}
 	
 	public abstract function getNextTid();
@@ -79,5 +90,7 @@ abstract class ContentTypeDescriptor implements Scopable {
 	public abstract function getRows($limit, $offset, $languge, $defaultLanguage);
 	public abstract function getContent($id);
 	public abstract function getReference($tId, $defaultLanguage);
+	public abstract function getUrlByRerence($tId, $language);
+	public abstract function getContents();
 	
 }

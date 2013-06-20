@@ -3,6 +3,11 @@ namespace Mouf\CMS;
 
 interface CMSBeanInterface {
 	
+	public function getId();
+	
+	public function getTitle();
+	public function setTitle($title);
+	
 	public function getLanguageId();
 	public function setLanguageId($language);
 	
@@ -17,4 +22,6 @@ interface CMSBeanInterface {
 	
 	public function getUrl();
 	public function setUrl($url);
+	
+	public function getPublished();
 }

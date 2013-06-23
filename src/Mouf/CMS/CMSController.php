@@ -26,7 +26,7 @@ class CMSController extends Controller implements UrlProviderInterface {
 	/**
 	 * @var array<ContentTypeDescriptor>
 	 */
-	public $contentTypes;
+	public $contentTypes = array();
 	
 	/**
 	 * @var BCEFormInstance
@@ -79,6 +79,10 @@ class CMSController extends Controller implements UrlProviderInterface {
 		$this->formInstance->form = $contentType->bceForm; 
 		
 		$this->formInstance->load($id);
+		if ($id == null){
+			$tId = $contentType->getNextTid();
+			$this->formInstance->getDescriptorInstance('translate_id')->setFieldValue($tId);
+		}
 		
 		$this->content->addFile(dirname(__FILE__)."/../../views/cms-form.php", $this);
 		$this->template->toHtml();
@@ -111,31 +115,28 @@ class CMSController extends Controller implements UrlProviderInterface {
 		$contentType = MoufManager::getMoufManager()->getInstance($contentTypeInstanceName);
 		$this->formInstance = new BCEFormInstance();
 		$this->formInstance->form = $contentType->bceForm;
-	
+		
 		$id = get('id');
 		$isNew = empty($id);
-	
+		
 		$id = $this->formInstance->save();
 	
 		$cmsBean =  $contentType->bceForm->mainDAO->getById($id);
 	
 		if ($isNew){
-			if (!$cmsBean->getTranslateId()){
-				$tId =  $contentType->getNextTid();
-				$cmsBean->setTranslateId($tId);
-			}
 			$cmsBean->setCreated(time());
 		}
 		$cmsBean->setUpdated(time());
+		$cmsBean->save();
+
 		$saved = $id != false;
-		
-		$urls = \Mouf::getSplash()->cacheService->get("splashUrlNodes");
-		/* @var $splashRoute SplashRoute */
-		$splashRoute = $urls->walk($cmsBean->getUrl(), null);
-		if ($splashRoute != null && ($splashRoute->controllerInstanceName != $contentTypeInstanceName || ($splashRoute->parameters[0] instanceof CMSParamFetcher && $splashRoute->parameters[0]->value != $cmsBean->getId()))){
-			$this->formInstance->form->addError('url', "URL '". $cmsBean->getUrl() ."' alerady exists please choose a different one.");
-			$saved = false;
-		}
+// 		$urls = \Mouf::getSplash()->cacheService->get("splashUrlNodes");
+// 		/* @var $splashRoute SplashRoute */
+// 		$splashRoute = $urls->walk($cmsBean->getUrl(), null);
+// 		if ($splashRoute != null && ($splashRoute->controllerInstanceName != $contentTypeInstanceName || ($splashRoute->parameters[0] instanceof CMSParamFetcher && $splashRoute->parameters[0]->value != $cmsBean->getId()))){
+// 			$this->formInstance->form->addError('url', "URL '". $cmsBean->getUrl() ."' alerady exists please choose a different one.");
+// 			$saved = false;
+// 		}
 		if (!$saved){
 			foreach ($this->formInstance->form->errorMessages as $field => $messages){
 				foreach ($messages as $message){
@@ -177,7 +178,7 @@ class CMSController extends Controller implements UrlProviderInterface {
 		$grid->output();
 	}
 	
-/**
+	/**
 	 * Returns the list of URLs that can be accessed, and the function/method that should be called when the URL is called.
 	 * 
 	 * @return array<SplashRoute>

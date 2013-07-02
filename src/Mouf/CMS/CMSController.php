@@ -122,12 +122,17 @@ class CMSController extends Controller implements UrlProviderInterface {
 		$id = $this->formInstance->save();
 	
 		$cmsBean =  $contentType->bceForm->mainDAO->getById($id);
-	
+		/* @var  $cmsBean CMSBeanInterface */
 		if ($isNew){
 			$cmsBean->setCreated(time());
 		}
+		$cmsBean->setUrl(str_replace(" ", "-", $contentType->name) . "-" . $cmsBean->getId());
 		$cmsBean->setUpdated(time());
 		$cmsBean->save();
+		
+		if (function_exists('menu_rebuild')){
+			menu_rebuild();
+		}
 
 		$saved = $id != false;
 // 		$urls = \Mouf::getSplash()->cacheService->get("splashUrlNodes");

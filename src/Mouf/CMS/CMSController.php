@@ -135,6 +135,7 @@ class CMSController extends Controller implements UrlProviderInterface {
 		}
 
 		$saved = $id != false;
+// 		FIXME : handle url unicity with dedicated MenuProviderInterface (!= or Splash and drupal... maybe get it from splash-common ? )
 // 		$urls = \Mouf::getSplash()->cacheService->get("splashUrlNodes");
 // 		/* @var $splashRoute SplashRoute */
 // 		$splashRoute = $urls->walk($cmsBean->getUrl(), null);
@@ -198,13 +199,28 @@ class CMSController extends Controller implements UrlProviderInterface {
 		foreach ($this->contentTypes as $contentType) {
 			$urlsList = array_merge($urlsList, $contentType->getUrls());
 		}
-		
 		return $urlsList;
 	}
 	
+	/**
+	 * @param string $contentTypeInstanceName
+	 * @param int $tId
+	 * @param bool $relative
+	 * @return string
+	 */
 	public function getUrlByRerence($contentTypeInstanceName, $tId, $relative = false){
 		$this->contentType = MoufManager::getMoufManager()->getInstance($contentTypeInstanceName);
 		return ($relative ? "" : ROOT_URL).$this->contentType->getUrlByRerence($tId, $this->languageDetection->getLanguage());
+	}
+	
+	/**
+	 * @param string $contentTypeInstanceName
+	 * @param int $tId
+	 * @return CMSBeanInerface
+	 */
+	public function getReference($contentTypeInstanceName, $tId){
+		$this->contentType = MoufManager::getMoufManager()->getInstance($contentTypeInstanceName);
+		return $this->contentType->getReference($tId, $this->defaultLanguage);
 	}
 
 }

@@ -202,9 +202,9 @@ class CMSController extends Controller implements UrlProviderInterface {
 		return $urlsList;
 	}
 	
-	public function getUrlByRerence($contentTypeInstanceName, $tId){
+	public function getUrlByRerence($contentTypeInstanceName, $tId, $relative = false){
 		$this->contentType = MoufManager::getMoufManager()->getInstance($contentTypeInstanceName);
-		return ROOT_URL.$this->contentType->getUrlByRerence($tId, $this->languageDetection->getLanguage());
+		return ($relative ? "" : ROOT_URL).$this->contentType->getUrlByRerence($tId, $this->languageDetection->getLanguage());
 	}
 
 }

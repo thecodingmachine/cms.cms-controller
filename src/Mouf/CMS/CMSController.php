@@ -112,7 +112,6 @@ class CMSController extends Controller implements UrlProviderInterface {
 	 */
 	public function saveContent($contentTypeInstanceName){
 		$contentType = MoufManager::getMoufManager()->getInstance($contentTypeInstanceName);
-		$contentType = MoufManager::getMoufManager()->getInstance($contentTypeInstanceName);
 		$this->formInstance = new BCEFormInstance();
 		$this->formInstance->form = $contentType->bceForm;
 		
@@ -125,8 +124,9 @@ class CMSController extends Controller implements UrlProviderInterface {
 		/* @var  $cmsBean CMSBeanInterface */
 		if ($isNew){
 			$cmsBean->setCreated(time());
+			$cmsBean->setUrl(str_replace(" ", "-", $contentType->name) . "-" . $cmsBean->getId());
 		}
-		$cmsBean->setUrl(str_replace(" ", "-", $contentType->name) . "-" . $cmsBean->getId());
+
 		$cmsBean->setUpdated(time());
 		$cmsBean->save();
 		
